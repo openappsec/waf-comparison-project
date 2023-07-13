@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project repository containts testing datasets and tools to compare WAF efficay in the two most important categories:
+This project repository contains testing datasets and tools to compare WAF efficacy in the two most important categories:
 
 -	Security Coverage (True Positive Rate) - measures the WAF's ability to correctly identify and block malicious requests is crucial in today's threat landscape. It must preemptively block zero-day attacks as well as effectively tackle known attack techniques utilized by hackers
 -	Precision (False Positive Rate) – measures the WAF's ability to correctly allow legitimate requests. Any hindrance to these valid requests could lead to significant business disruption and an increased workload for administrators.
