@@ -128,6 +128,9 @@ class Wafs:
         """
         Function to send payloads to all WAFs
         """
+        if not self.wafs.values():
+            log.warning('WAFS_DICT is empty, skipping payload send step.')
+            return
 
         # Delete old results:
         dropTableIfExists('waf_comparison')

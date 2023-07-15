@@ -116,6 +116,14 @@ def sendRequest(_method, _url, _headers=None, _data=None, _timeout=0.5) -> [int,
     return [0, False]
 
 
+def isTableExists(_table_name):
+    """
+    Check if table _table_name exists in the DB.
+    """
+    with engine.connect() as connection:
+        return engine.dialect.has_table(connection, _table_name)
+
+
 def dropTableIfExists(_table_name):
     metadata = MetaData()
     connection = engine.connect()

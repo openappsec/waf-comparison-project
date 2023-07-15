@@ -3,44 +3,52 @@ from pathlib import Path
 import pandas as pd
 
 from config import engine
-from helper import log
+from helper import log, isTableExists
 
 COLOR_CONTINUOUS_SCALE = ["#024E1B", "#006B3E", "#FFE733", "#FFAA1C", "#FF8C01", "#ED2938"]
 
-df_results = pd.read_sql_query("""
-WITH TNR AS (
-    SELECT "WAF_Name",
-           SUM(CASE WHEN "isBlocked" = False THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS TrueNegativeRate
-    FROM waf_comparison
-    WHERE response_status_code != 0 and "DataSetType" = 'Legitimate'
-    GROUP BY "WAF_Name"
-),
-    TPR AS (
-    SELECT "WAF_Name",
-           SUM(CASE WHEN "isBlocked" = True THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS TruePositiveRate
-    FROM waf_comparison
-    WHERE response_status_code != 0 and "DataSetType" = 'Malicious'
-    GROUP BY "WAF_Name"
-)
-SELECT TPR."WAF_Name",
-       ROUND(100-TNR.TrueNegativeRate, 3) AS FalsePositiveRate,
-       ROUND(100-TPR.TruePositiveRate, 3) AS FalseNegativeRate,
-       ROUND(TPR.TruePositiveRate, 3) AS TruePositiveRate,
-       ROUND(TNR.TruenegativeRate, 3) AS TruenegativeRate,
-       ROUND((TPR.TruePositiveRate + TNR.TruenegativeRate)/2, 2) AS BalancedAccuracy
-FROM TPR
-JOIN TNR on TPR."WAF_Name" = TNR."WAF_Name"
-ORDER BY BalancedAccuracy DESC
-""", engine)
 
-_dff = df_results.rename({
-    "WAF_Name": "WAF Name",
-    "falsepositiverate": "False Positive Rate",
-    "falsenegativerate": "False Negative rate",
-    "truepositiverate": "True Positive Rate",
-    "truenegativerate": "True Negative Rate",
-    "balancedaccuracy": "Balanced Accuracy",
-}, axis=1).copy()
+def load_data():
+    """
+    Loads the results from the DB.
+    """
+
+    df_results = pd.read_sql_query("""
+    WITH TNR AS (
+        SELECT "WAF_Name",
+               SUM(CASE WHEN "isBlocked" = False THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS TrueNegativeRate
+        FROM waf_comparison
+        WHERE response_status_code != 0 and "DataSetType" = 'Legitimate'
+        GROUP BY "WAF_Name"
+    ),
+        TPR AS (
+        SELECT "WAF_Name",
+               SUM(CASE WHEN "isBlocked" = True THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS TruePositiveRate
+        FROM waf_comparison
+        WHERE response_status_code != 0 and "DataSetType" = 'Malicious'
+        GROUP BY "WAF_Name"
+    )
+    SELECT TPR."WAF_Name",
+           ROUND(100-TNR.TrueNegativeRate, 3) AS FalsePositiveRate,
+           ROUND(100-TPR.TruePositiveRate, 3) AS FalseNegativeRate,
+           ROUND(TPR.TruePositiveRate, 3) AS TruePositiveRate,
+           ROUND(TNR.TruenegativeRate, 3) AS TruenegativeRate,
+           ROUND((TPR.TruePositiveRate + TNR.TruenegativeRate)/2, 2) AS BalancedAccuracy
+    FROM TPR
+    JOIN TNR on TPR."WAF_Name" = TNR."WAF_Name"
+    ORDER BY BalancedAccuracy DESC
+    """, engine)
+
+    _dff = df_results.rename({
+        "WAF_Name": "WAF Name",
+        "falsepositiverate": "False Positive Rate",
+        "falsenegativerate": "False Negative rate",
+        "truepositiverate": "True Positive Rate",
+        "truenegativerate": "True Negative Rate",
+        "balancedaccuracy": "Balanced Accuracy",
+    }, axis=1).copy()
+
+    return _dff
 
 
 def create_graph(_df, metric, is_ascending):
@@ -98,6 +106,13 @@ def create_2d_graph(_df):
 
 
 def analyze_results():
+    # Check if table exits.
+    if not isTableExists('waf_comparison'):
+        log.warning("Table waf_comparison doesn't exists in the DB, The analyzer was called before the runner.")
+        log.warning("Please fill WAFS_DICT configuration in the config.py file and run the script again.")
+        return
+
+    _dff = load_data()
     create_graph(_dff, metric='False Positive Rate', is_ascending=False)
     create_graph(_dff, metric='False Negative rate', is_ascending=False)
     create_graph(_dff, metric='True Positive Rate', is_ascending=True)
