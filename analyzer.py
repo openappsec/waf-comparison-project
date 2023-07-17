@@ -32,8 +32,8 @@ def load_data():
            ROUND(100-TNR.TrueNegativeRate, 3) AS FalsePositiveRate,
            ROUND(100-TPR.TruePositiveRate, 3) AS FalseNegativeRate,
            ROUND(TPR.TruePositiveRate, 3) AS TruePositiveRate,
-           ROUND(TNR.TruenegativeRate, 3) AS TruenegativeRate,
-           ROUND((TPR.TruePositiveRate + TNR.TruenegativeRate)/2, 2) AS BalancedAccuracy
+           ROUND(TNR.TruenegativeRate, 3) AS TrueNegativeRate,
+           ROUND((TPR.TruePositiveRate + TNR.TruenegativeRate)/2, 3) AS BalancedAccuracy
     FROM TPR
     JOIN TNR on TPR."WAF_Name" = TNR."WAF_Name"
     ORDER BY BalancedAccuracy DESC
@@ -41,11 +41,11 @@ def load_data():
 
     _dff = df_results.rename({
         "WAF_Name": "WAF Name",
-        "falsepositiverate": "False Positive Rate",
-        "falsenegativerate": "False Negative rate",
-        "truepositiverate": "True Positive Rate",
-        "truenegativerate": "True Negative Rate",
-        "balancedaccuracy": "Balanced Accuracy",
+        "FalsePositiveRate": "False Positive Rate",
+        "FalseNegativeRate": "False Negative rate",
+        "TruePositiveRate": "True Positive Rate",
+        "TrueNegativeRate": "True Negative Rate",
+        "BalancedAccuracy": "Balanced Accuracy",
     }, axis=1).copy()
 
     return _dff
