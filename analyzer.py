@@ -16,36 +16,36 @@ def load_data():
     df_results = pd.read_sql_query("""
     WITH TNR AS (
         SELECT "WAF_Name",
-               SUM(CASE WHEN "isBlocked" = False THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS TrueNegativeRate
+               SUM(CASE WHEN "isBlocked" = False THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS true_negative_rate
         FROM waf_comparison
         WHERE response_status_code != 0 and "DataSetType" = 'Legitimate'
         GROUP BY "WAF_Name"
     ),
         TPR AS (
         SELECT "WAF_Name",
-               SUM(CASE WHEN "isBlocked" = True THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS TruePositiveRate
+               SUM(CASE WHEN "isBlocked" = True THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS true_positive_rate
         FROM waf_comparison
         WHERE response_status_code != 0 and "DataSetType" = 'Malicious'
         GROUP BY "WAF_Name"
     )
     SELECT TPR."WAF_Name",
-           ROUND(100-TNR.TrueNegativeRate, 3) AS FalsePositiveRate,
-           ROUND(100-TPR.TruePositiveRate, 3) AS FalseNegativeRate,
-           ROUND(TPR.TruePositiveRate, 3) AS TruePositiveRate,
-           ROUND(TNR.TruenegativeRate, 3) AS TrueNegativeRate,
-           ROUND((TPR.TruePositiveRate + TNR.TruenegativeRate)/2, 3) AS BalancedAccuracy
+           ROUND(100-TNR.true_negative_rate, 3) AS false_positive_rate,
+           ROUND(100-TPR.true_positive_rate, 3) AS false_negative_rate,
+           ROUND(TPR.true_positive_rate, 3) AS true_positive_rate,
+           ROUND(TNR.true_negative_rate, 3) AS true_negative_rate,
+           ROUND((TPR.true_positive_rate + TNR.true_negative_rate)/2, 3) AS balanced_accuracy
     FROM TPR
     JOIN TNR on TPR."WAF_Name" = TNR."WAF_Name"
-    ORDER BY BalancedAccuracy DESC
+    ORDER BY balanced_accuracy DESC
     """, engine)
 
     _dff = df_results.rename({
         "WAF_Name": "WAF Name",
-        "FalsePositiveRate": "False Positive Rate",
-        "FalseNegativeRate": "False Negative rate",
-        "TruePositiveRate": "True Positive Rate",
-        "TrueNegativeRate": "True Negative Rate",
-        "BalancedAccuracy": "Balanced Accuracy",
+        "false_positive_rate": "False Positive Rate",
+        "false_negative_rate": "False Negative rate",
+        "true_positive_rate": "True Positive Rate",
+        "true_negative_rate": "True Negative Rate",
+        "balanced_accuracy": "Balanced Accuracy",
     }, axis=1).copy()
 
     return _dff
