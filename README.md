@@ -13,27 +13,6 @@ The project is described in detail in this [blog](https://www.openappsec.io/post
 
 
 ## Setup Instructions
-
-
-### Important: BEFORE cloning the repository insure git lfs is installed.
-For Windows installation follow [this link](https://git-lfs.com/)
-
-For apt/deb:
-```shell
-sudo apt-get install git-lfs
-```
-For yum/rpm: 
-```shell
-sudo yum install git-lfs
-```
-For other operating systems follow [this link](https://github.com/git-lfs/git-lfs#installing)
-
-Then run
-```shell
-git lfs install
-```
-
-### Tool Setup Instructions
 Follow the steps below to set up and run the tool:
 
 Download the necessary python requirements

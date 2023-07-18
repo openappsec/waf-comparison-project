@@ -7,8 +7,9 @@ import json
 import time
 
 from sqlalchemy import MetaData, Table
+from tqdm import tqdm
 
-from config import DATA_PATH, LEGITIMATE_PATH, MALICIOUS_PATH, engine
+from config import DATA_PATH, LEGITIMATE_URL_PATH, MALICIOUS_URL_PATH, LEGITIMATE_PATH, MALICIOUS_PATH, engine
 
 LOG_LEVEL = logging.DEBUG
 LOGFORMAT = "  %(log_color)s%(levelname)-8s%(reset)s | %(log_color)s%(message)s%(reset)s"
@@ -31,9 +32,10 @@ def load_data(_log_file):
         return json.load(_file)
 
 
-def MaliciousDataSetPreparation():
+def _MaliciousDataSetPreparation():
     """
-    Prepare the Malicious data set.
+    ***Not in use***
+    This function download the original mgm files and convert it to the tool format
     """
     malicious_data = f"https://api.github.com/repos/openappsec/mgm-web-attack-payloads/contents/nuclei/payloads"
     test_names = requests.get(malicious_data)
@@ -68,25 +70,45 @@ def MaliciousDataSetPreparation():
             json.dump(test_set_content, _file)
 
 
-def LegitimateDataSetPreparation():
+def zip_extract(file_to_extract):
     """
-    Extract the Legitimate Data set.
+    Extract zip files
     """
-    with zipfile.ZipFile(DATA_PATH / 'Legitimate.zip', 'r') as zip_ref:
+    with zipfile.ZipFile(file_to_extract, 'r') as zip_ref:
         zip_ref.extractall(DATA_PATH)
 
+
+def download_file(url, _progress_bar_name):
+    response = requests.get(url, stream=True)
+
+    total_size = int(response.headers.get('content-length', 0))
+    block_size = 1024  # 1 KB
+    progress_bar = tqdm(total=total_size, unit='B', unit_scale=True,desc=f"Downloading {_progress_bar_name}")
+
+    file_path = DATA_PATH / url.split("/")[-1]
+
+    # Download the data set in zip format
+    with open(file_path, 'wb') as file:
+        for data in response.iter_content(block_size):
+            progress_bar.update(len(data))
+            file.write(data)
+
+    progress_bar.close()
+
+    # Extract zip data set
+    zip_extract(file_path)
 
 def prepare_data():
     if MALICIOUS_PATH.exists():
         log.debug("Malicious Data Set Already Loaded")
     else:
-        MaliciousDataSetPreparation()
+        download_file(MALICIOUS_URL_PATH, "Malicious Data set")
         log.info("Malicious Data Set Preparation Completed.")
 
     if LEGITIMATE_PATH.exists():
         log.debug("Legitimate Data Set Already Loaded")
     else:
-        LegitimateDataSetPreparation()
+        download_file(LEGITIMATE_URL_PATH, "Legitimate Data set")
         log.info("Legitimate Data Set Preparation Completed.")
 
 
