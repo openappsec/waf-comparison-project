@@ -1,6 +1,8 @@
+![image](https://github.com/openappsec/waf-comparison-project/assets/114033741/f0d16947-9c50-46ee-ac3f-1f17e42cc010)
+
 # Web Application Firewall (WAF) Comparison Project
 
-## Project Overview
+## Overview
 
 This project repository contains testing datasets and tools to compare WAF efficacy in the two most important categories:
 
