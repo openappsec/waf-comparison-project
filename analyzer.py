@@ -16,14 +16,14 @@ def load_data():
     df_results = pd.read_sql_query("""
     WITH TNR AS (
         SELECT "WAF_Name",
-               SUM(CASE WHEN "isBlocked" = False THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS true_negative_rate
+               SUM(CASE WHEN "isBlocked" = 0 THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS true_negative_rate
         FROM waf_comparison
         WHERE response_status_code != 0 and "DataSetType" = 'Legitimate'
         GROUP BY "WAF_Name"
     ),
         TPR AS (
         SELECT "WAF_Name",
-               SUM(CASE WHEN "isBlocked" = True THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS true_positive_rate
+               SUM(CASE WHEN "isBlocked" = 1 THEN 1.0 ELSE 0.0 END) / count(*) * 100 AS true_positive_rate
         FROM waf_comparison
         WHERE response_status_code != 0 and "DataSetType" = 'Malicious'
         GROUP BY "WAF_Name"
