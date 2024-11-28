@@ -118,8 +118,10 @@ def sendRequest(_method, _url, _headers=None, _data=None, _timeout=0.5) -> [int,
     """
 
     # Delete host header in order for requests to generate it automatically
-    if _headers and "Host" in _headers:
-        _headers.pop("Host")
+    if _headers:
+        for key in list(_headers.keys()):
+            if key.lower() == "host":
+                _headers.pop(key)
 
     attempts = 0
 
