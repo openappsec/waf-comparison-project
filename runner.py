@@ -62,20 +62,21 @@ class Wafs:
             )
 
             if resStatusCode == 200:
-                log.info(f"Health check passed - WAF: {_waf:50}")
+                log.info(f"Health check passed - WAF: {_waf:61}")
             else:
-                log.error(f"Health check failed - WAF: {_waf:50}")
+                log.error(f"Health check failed - WAF: {_waf:61} - please ensure the WAF allows the following request: {self.get_url_by_waf_name(_waf)}")
                 checkFailed = True
 
         # For each WAF, send a potentially harmful GET request and check if it gets blocked.
         log.debug("Initiating WAF functionality verification to ensure that the WAF is in prevention mode and is "
                   "capable of blocking malicious requests.")
         for _waf in self.wafs:
-            resStatusCode, isBlocked = sendRequest('GET', self.get_url_by_waf_name(_waf) + "/<script>alert(1)</script>")
+            malicious_payload = self.get_url_by_waf_name(_waf) + "/?a=<script>alert(1)</script>"
+            resStatusCode, isBlocked = sendRequest('GET', malicious_payload)
             if isBlocked:
                 log.info(f"WAF functionality check passed - WAF: {_waf:50}")
             else:
-                log.error(f"WAF functionality check failed - WAF: {_waf:50}")
+                log.error(f"WAF functionality check failed - WAF: {_waf:50} - please ensure the WAF blocks the following payload: {malicious_payload}")
                 checkFailed = True
 
         # If any test has failed, raise an error. Otherwise, log that all tests have completed successfully.
