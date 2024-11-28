@@ -1,4 +1,4 @@
-SQLAlchemy
+SQLAlchemy==1.4.46
 requests
 colorlog
 pandas
