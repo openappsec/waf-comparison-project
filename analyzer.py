@@ -6,6 +6,7 @@ from config import engine
 from helper import log, isTableExists
 
 COLOR_CONTINUOUS_SCALE = ["#024E1B", "#006B3E", "#FFE733", "#FFAA1C", "#FF8C01", "#ED2938"]
+OUTPUT_PATH = Path("Output")
 
 
 def load_data():
@@ -76,8 +77,7 @@ def create_graph(_df, metric, is_ascending):
     print(f'\n\n{metric}:\n')
     print(_df_sorted[['Position', 'WAF Name', metric]].to_string(index=False))
 
-    Path("Output").mkdir(exist_ok=True)
-    fig.write_html(f"Output\\{metric}.html")
+    fig.write_html(OUTPUT_PATH / f"{metric}.html")
 
 
 def create_2d_graph(_df):
@@ -89,11 +89,11 @@ def create_2d_graph(_df):
         x='True Negative Rate',
         y='True Positive Rate',
         labels={
-            "True Negative Rate": "Accuracy (100-False Positive Rate)",
-            "True Positive Rate": "Security Coverage (True Positive Rate)"
+            "True Negative Rate": "Detection Quality (True Negative Rate)",
+            "True Positive Rate": "Security Quality (True Positive Rate)"
         },
         color='Balanced Accuracy',
-        title="WAF Comparison 2023 - Security Coverage & Accuracy",
+        title="WAF Comparison Project - Security & Detection Quality",
         text='WAF Name',
         template='plotly',
         color_continuous_scale=COLOR_CONTINUOUS_SCALE[::-1],
@@ -101,8 +101,7 @@ def create_2d_graph(_df):
     ).update_layout(title_x=0.5, font=dict(size=16))
     fig.update_traces(textposition="bottom center")
 
-    Path("Output").mkdir(exist_ok=True)
-    fig.write_html(f"Output\\2d Graph True Negative Rate & True Positive Rate.html")
+    fig.write_html(OUTPUT_PATH / "2d Graph True Negative Rate & True Positive Rate.html")
 
 
 def analyze_results():
@@ -111,6 +110,9 @@ def analyze_results():
         log.warning("Table waf_comparison doesn't exists in the DB, The analyzer was called before the runner.")
         log.warning("Please fill WAFS_DICT configuration in the config.py file and run the script again.")
         return
+
+    # Create the output directory
+    OUTPUT_PATH.mkdir(exist_ok=True)
 
     _dff = load_data()
     create_graph(_dff, metric='False Positive Rate', is_ascending=False)
