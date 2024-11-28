@@ -37,6 +37,33 @@ Open the config.py file in a text editor. Here, you'll find placeholders for WAF
 
 Once you've input all necessary data, save and close the config.py file. Your tool is now customized for your WAF systems and ready for testing.
 
+### 3. Configure the Upstream application (Optional)
+
+This nginx configuration works both when nginx is an upstream application before third-party WAFs like Cloudflare and when WAFs are integrated directly on top of nginx, such as Check Point CloudGuard WAF or F5 App Protect.
+
+```nginx
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    client_max_body_size 1G;
+    server_name _;
+
+    location / {
+        proxy_set_header Host $host;
+        proxy_pass http://localhost:8080;
+    }
+}
+
+server {
+    listen 8080 default_server;
+    client_max_body_size 1G;
+    location / {
+        add_header Content-Type text/plain;
+        return 200 "OK";
+    }
+}
+```
+
 ### 3. Run the Tool
 Execute the main runner file by running the following command:
 
