@@ -64,7 +64,7 @@ server {
 }
 ```
 
-### 3. Run the Tool
+### 4. Run the Tool
 Execute the main runner file by running the following command:
 
    ```shell
