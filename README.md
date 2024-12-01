@@ -11,7 +11,7 @@ This project repository contains testing datasets and tools to compare WAF effic
 
 This project aims to measure the efficacy of each WAF against a variety of legitimate and malicious HTTP requests, taken from real-world scenarios.
 
-The project is described in detail in this [blog](https://www.openappsec.io/post/best-waf-solutions-in-2023-real-world-comparison).
+The project is described in detail in this [blog](https://www.openappsec.io/post/best-waf-solutions-in-2024-2025-real-world-comparison).
 
 
 ## Setup Instructions
@@ -154,7 +154,7 @@ The Malicous Requests Dataset is a collection of datasets assembeled by MGM with
 The data sets used for this project are available via GitHub and will be updated annually.
 
 ## Related Resources
-For an in-depth discussion and analysis of the results, see our [WAF Comparison Blog Post](https://www.openappsec.io/post/best-waf-solutions-in-2023-real-world-comparison).
+For an in-depth discussion and analysis of the results, see our [WAF Comparison Blog Post](https://www.openappsec.io/post/best-waf-solutions-in-2024-2025-real-world-comparison).
 
 [MGM WAF Payload Collection](https://github.com/mgm-sp/WAF-Payload-Collection)
 
