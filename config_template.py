@@ -1,8 +1,8 @@
-from sqlalchemy import create_engine
+import sqlite3
 from pathlib import Path
 
 # Database configuration
-engine = create_engine(rf"sqlite:///waf_comparison.db")
+conn = sqlite3.connect('waf_comparison.db')
 
 # Data set paths
 LEGITIMATE_URL_PATH = "https://downloads.openappsec.io/waf-comparison-project/legitimate.zip"

@@ -1,6 +1,5 @@
-SQLAlchemy==1.4.46
-requests
-colorlog
-pandas
-tqdm
-plotly
+requests~=2.32.3
+colorlog~=6.9.0
+tqdm~=4.67.1
+pandas~=2.2.3
+plotly~=6.0.0

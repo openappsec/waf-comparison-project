@@ -1,4 +1,5 @@
 from colorlog import ColoredFormatter
+from tqdm import tqdm
 import urllib.parse
 import requests
 import logging
@@ -6,10 +7,7 @@ import zipfile
 import json
 import time
 
-from sqlalchemy import MetaData, Table
-from tqdm import tqdm
-
-from config import DATA_PATH, LEGITIMATE_URL_PATH, MALICIOUS_URL_PATH, LEGITIMATE_PATH, MALICIOUS_PATH, engine
+from config import DATA_PATH, LEGITIMATE_URL_PATH, MALICIOUS_URL_PATH, LEGITIMATE_PATH, MALICIOUS_PATH, conn
 
 LOG_LEVEL = logging.DEBUG
 LOGFORMAT = "  %(log_color)s%(levelname)-8s%(reset)s | %(log_color)s%(message)s%(reset)s"
@@ -142,21 +140,22 @@ def sendRequest(_method, _url, _headers=None, _data=None, _timeout=0.5) -> [int,
 
 def isTableExists(_table_name):
     """
-    Check if table _table_name exists in the DB.
+    Check if table _table_name exists in the SQLite DB.
     """
-    with engine.connect() as connection:
-        return engine.dialect.has_table(connection, _table_name)
-
+    cur = conn.cursor()
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (_table_name,))
+    exists = cur.fetchone() is not None
+    cur.close()
+    return exists
 
 def dropTableIfExists(_table_name):
-    metadata = MetaData()
-    connection = engine.connect()
-
-    # Check if table exists before dropping
-    if engine.dialect.has_table(connection, _table_name):
-        table_to_drop = Table(_table_name, metadata, autoload_with=engine)
-        table_to_drop.drop(engine)
-        log.debug('Starting New test, table waf_comparison was dropped')
-
-    # Remember to close the connection
-    connection.close()
+    """
+    Drop table _table_name if it exists in the SQLite DB.
+    Log the drop action only if the table was present.
+    """
+    if isTableExists(_table_name):
+        cur = conn.cursor()
+        cur.execute("DROP TABLE {}".format(_table_name))
+        conn.commit()  # commit changes to the DB
+        log.debug(f"Starting New test, table {_table_name} was dropped")
+        cur.close()

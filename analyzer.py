@@ -2,7 +2,7 @@ import plotly.express as px
 from pathlib import Path
 import pandas as pd
 
-from config import engine
+from config import conn
 from helper import log, isTableExists
 
 COLOR_CONTINUOUS_SCALE = ["#024E1B", "#006B3E", "#FFE733", "#FFAA1C", "#FF8C01", "#ED2938"]
@@ -38,7 +38,7 @@ def load_data():
     FROM TPR
     JOIN TNR on TPR."WAF_Name" = TNR."WAF_Name"
     ORDER BY balanced_accuracy DESC
-    """, engine)
+    """, conn)
 
     _dff = df_results.rename({
         "WAF_Name": "WAF Name",

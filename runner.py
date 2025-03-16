@@ -1,5 +1,4 @@
 # Import required libraries
-from sqlalchemy.exc import ObjectNotExecutableError
 import concurrent.futures
 from tqdm import tqdm
 import pandas as pd
@@ -9,7 +8,7 @@ import json
 
 from analyzer import analyze_results
 # Import custom modules
-from config import engine, WAFS_DICT, DATA_PATH
+from config import conn, WAFS_DICT, DATA_PATH
 from helper import load_data, sendRequest, log, prepare_data, dropTableIfExists
 
 
@@ -19,11 +18,11 @@ def check_engine_connection():
     """
     try:
         # Try executing a simple query to check the connection
-        _ = pd.read_sql_query("SELECT 1", engine)
+        _ = pd.read_sql_query("SELECT 1", conn)
         log.info("Database Connected Successfully")
 
-    except ObjectNotExecutableError:
-        raise ObjectNotExecutableError("Connection to the database failed")
+    except Exception as e:
+        raise ConnectionError(f"Database Connection Failed: {e}")
 
 
 class Wafs:
@@ -123,7 +122,7 @@ class Wafs:
         dff['data'] = dff['data'].str.replace("\x00", "\uFFFD")
 
         # Upload the DataFrame to the Database
-        dff.to_sql('waf_comparison', engine, if_exists='append', index=False)
+        dff.to_sql('waf_comparison', conn, if_exists='append', index=False)
 
     def send_payloads(self):
         """
