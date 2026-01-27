@@ -1,9 +1,3 @@
 .idea
 __pycache__
-/Output/*
-Data/Legitimate/*
-Data/Malicious/*
-Data/Legitimate.zip
-Data/Malicious.zip
-config.py
-waf_comparison.db
+results/

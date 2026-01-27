@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WAF Comparison Report</title>
+  </head>
+  <body>
+    {% for waf in wafs_data %}
+    <!-- First Page for {{ waf.waf_name }} -->
+    <div class="page">
+      <div class="header-bar">
+        <div class="header-left">
+          <h1>WAF Comparison Report</h1>
+        </div>
+        <div class="header-right">{{ images.check_point_logo|safe }}</div>
+      </div>
+      <div class="title">{{ waf.waf_name }}</div>
+      <div class="page-content">
+        <div class="card info-card">
+          <div class="info-item">
+            <span class="info-card-label">Test execution date</span>
+            <div class="info-card-value">
+              <svg
+                class="info-card-icon calendar"
+                fill="none"
+                stroke="#121823"
+                viewBox="0 0 24 24"
+              >
+                <rect
+                  x="3"
+                  y="4"
+                  width="18"
+                  height="18"
+                  rx="2"
+                  ry="2"
+                  stroke-width="2"
+                />
+                <line x1="16" y1="2" x2="16" y2="6" stroke-width="2" />
+                <line x1="8" y1="2" x2="8" y2="6" stroke-width="2" />
+                <line x1="3" y1="10" x2="21" y2="10" stroke-width="2" />
+              </svg>
+              <span class="value-text">{{ waf.first_page.test_date }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-card-label">WAF URL</span>
+            <div class="info-card-value">
+              <svg
+                class="info-card-icon link"
+                fill="none"
+                stroke="#0066cc"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+              <span class="value-text">{{ waf.first_page.waf_url }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-card-label">Legitimate requests</span>
+            <div class="info-card-value">
+              <svg
+                class="info-card-icon check-circle"
+                fill="none"
+                stroke="#10b981"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="10" stroke-width="2" />
+                <path
+                  d="M9 12l2 2 4-4"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span class="value-text"
+                >{{ waf.first_page.requests.legitimate_count }}</span
+              >
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-card-label">Malicious requests</span>
+            <div class="info-card-value">
+              <svg
+                class="info-card-icon alert-circle"
+                fill="none"
+                stroke="#ef4444"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="10" stroke-width="2" />
+                <line
+                  x1="12"
+                  y1="8"
+                  x2="12"
+                  y2="12"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                <circle cx="12" cy="16" r="1" fill="#ef4444" />
+              </svg>
+              <span class="value-text"
+                >{{ waf.first_page.requests.malicious_count }}</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="card score-card">
+          <div
+            class="score-card-left-wrapper"
+            style="--score-color: {{ waf.first_page.score_card.score_color }};"
+          >
+            <div class="score-left">
+              <span class="score-label">Your score:</span>
+              <div class="score-number">
+                <span class="score-value"
+                  >{{ waf.first_page.score_card.score }}</span
+                >
+                <span class="score-total">/100</span>
+              </div>
+              <span class="score-subtitle">Balanced accuracy score</span>
+            </div>
+            <div class="score-gradient-bar-container">
+              <div class="score-gradient-bar">
+                {{ waf.first_page.score_card.color_legend|safe }}
+              </div>
+            </div>
+            <div class="score-metrics">
+              {{ waf.first_page.score_card.tp_text }} | {{
+              waf.first_page.score_card.tn_text }}
+            </div>
+          </div>
+          <div class="score-right-wrapper">
+            <div class="score-assessment">
+              {{ waf.first_page.score_card.score_texts.result }}
+            </div>
+            <div class="score-text-box-wrapper">
+                <div class="score-text-box">
+                  <div class="score-row-title">What it means</div>
+                  <div class="score-row-text">
+                    {{ waf.first_page.score_card.score_texts.what_it_means }}
+                  </div>
+                </div>
+                <div class="score-text-box">
+                  <div class="score-row-title">What to do</div>
+                  <div class="score-row-text">
+                    {{ waf.first_page.score_card.score_texts.what_to_do}}
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="card box">
+          <span class="card-title">WAF Results Overview</span>
+          <div class="card-title-border"></div>
+          <!-- Left block (TP) -->
+          <div class="score-gauge-container">
+            <!-- Left numbers -->
+            <div class="side">
+              <div class="value">
+                {{ waf.first_page.gauge.left_percentage }}<small>%</small>
+              </div>
+              <div class="label">
+                <span class="main">Security Quality</span>
+                <span class="sub">(True Positive)</span>
+              </div>
+              <div class="bullet-text">
+                  {{ waf.first_page.gauge.left_bullet }}
+              </div>
+            </div>
+            <!-- Gauge -->
+            <div class="gauge-wrap">
+              <div class="hundred">100%</div>
+              <svg viewBox="80 80 840 840" xmlns="http://www.w3.org/2000/svg">
+                <!-- Define the shield icon as a reusable symbol -->
+                <defs>
+                  <!-- Shield icon definition (centered at origin) -->
+                  <symbol id="shield-icon-{{ loop.index }}" viewBox="0 0 82 82">
+                    <g>
+                      <circle
+                        cx="41"
+                        cy="41"
+                        r="39.5"
+                        fill="none"
+                        stroke="#D9D9D9"
+                        stroke-width="3"
+                      />
+                    </g>
+                    <path
+                      d="M57.9151 27.9739C51.3699 25.6788 43.3719 21.3329 41.6589 19.4977C41.5128 19.3414 41.3388 19.2169 41.1468 19.1315C40.9548 19.0461
+                                 40.7487 19.0014 40.5402 19C40.1224 19.0123 39.7228 19.1827 39.4151 19.4799C34.6558 23.5916 29.1101 26.5794 23.1547 28.2405C22.8223
+                                 28.3388 22.5297 28.5485 22.3212 28.8377C22.1128 29.1269 22 29.4797 22 29.8425C22 48.1324 24.7048 57.6485 40.0707 62.2609C40.3554
+                                 62.3469 40.6573 62.3469 40.942 62.2609C56.3925 57.6196 59 48.4213 59 29.5536C58.9997 29.204 58.8949 28.8634 58.7002 28.5799C58.5055
+                                 28.2964 58.2308 28.0844 57.9151 27.9739ZM40.4958 58.9238C27.8072 54.9756 25.2694 48.0369 25.1658 31.0867C30.725 29.341 35.9389 26.5562
+                                 40.5571 22.866C45.3288 26.1215 50.4541 28.7657 55.8236 30.7423C55.7221 47.9525 53.2098 54.9689 40.4958 58.9238Z"
+                      fill="#D9D9D9"
+                    />
+                  </symbol>
+                </defs>
+                <!-- Base track (gray background) - left half -->
+                <path
+                  d="{{ waf.first_page.gauge.track_left_path }}"
+                  stroke="#E0E0E0"
+                  fill="none"
+                  stroke-width="{{ waf.first_page.gauge.stroke_width }}"
+                  stroke-linecap="square"
+                />
+                <path
+                  d="{{ waf.first_page.gauge.track_right_path }}"
+                  stroke="#E0E0E0"
+                  fill="none"
+                  stroke-width="{{ waf.first_page.gauge.stroke_width }}"
+                  stroke-linecap="square"
+                />
+                <path
+                  d="{{ waf.first_page.gauge.progress_left_path_square }}"
+                  stroke="{{ waf.first_page.gauge.left_color }}"
+                  fill="none"
+                  stroke-width="{{ waf.first_page.gauge.stroke_width }}"
+                  stroke-linecap="square"
+                />
+                <path
+                  d="{{ waf.first_page.gauge.progress_left_path_round }}"
+                  stroke="{{ waf.first_page.gauge.left_color }}"
+                  fill="none"
+                  stroke-width="{{ waf.first_page.gauge.stroke_width }}"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="{{ waf.first_page.gauge.progress_right_path_round }}"
+                  stroke="{{ waf.first_page.gauge.right_color }}"
+                  fill="none"
+                  stroke-width="{{ waf.first_page.gauge.stroke_width }}"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="{{ waf.first_page.gauge.progress_right_path_square }}"
+                  stroke="{{ waf.first_page.gauge.right_color }}"
+                  fill="none"
+                  stroke-width="{{ waf.first_page.gauge.stroke_width }}"
+                  stroke-linecap="square"
+                />
+                {{ waf.first_page.gauge.left_tick_line|safe }} {{
+                waf.first_page.gauge.left_end_tick_line|safe }} {{
+                waf.first_page.gauge.right_tick_line|safe }} {{
+                waf.first_page.gauge.right_end_tick_line|safe }}
+                <g transform="translate(500, 500)">
+                  <use
+                    href="#shield-icon-{{ loop.index }}"
+                    x="-160"
+                    y="-160"
+                    width="320"
+                    height="320"
+                  />
+                </g>
+              </svg>
+              <div class="score-caption">Score</div>
+            </div>
+            <!-- Right numbers -->
+            <div class="side">
+              <div class="value">
+                {{ waf.first_page.gauge.right_percentage }}<small>%</small>
+              </div>
+              <div class="label">
+                <span class="main">Detection Quality</span>
+                <span class="sub">(True Negative)</span>
+              </div>
+              <div class="bullet-text">
+                {{ waf.first_page.gauge.right_bullet }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card box">
+          <div class="card-title-box">
+            <span class="card-title">WAF Vendors Comparison</span>
+            <div class="title-divider"></div>
+            <span class="card-subtitle"
+              >Compare your results to pre-tested WAF results</span
+            >
+          </div>
+          <div class="card-title-border"></div>
+          <div class="bar-chart-container">
+            <img
+              src="{{ waf.first_page.bar_chart }}"
+              alt="WAF Vendors Comparison Chart"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">
+      <div class="footer-left">
+        <span class="page-number">Page {{ (loop.index - 1) * 4 + 1 }}</span>
+      </div>
+      <div class="footer-right">
+        <span class="copyright-text"
+          >© Check Point Software Technologies Ltd. All rights reserved.</span
+        >
+      </div>
+    </div>
+    <!-- Second Page for {{ waf.waf_name }} -->
+    <div class="page">
+      <div class="header-bar">
+        <div class="header-left">
+          <h1>WAF Comparison Report</h1>
+        </div>
+        <div class="header-right">{{ images.check_point_logo|safe }}</div>
+      </div>
+      <div class="title">{{ waf.waf_name }}</div>
+      <div class="page-content">
+        <div class="card box">
+          <span class="card-title">WAF Results Overview</span>
+          <div class="card-title-border"></div>
+          <div class="polar-charts-container">
+            <div class="polar-chart-item">
+              <h3 class="polar-chart-title">
+                Blocked Malicious Requests (True Positive)
+              </h3>
+              <div class="polar-chart-wrapper">
+                <img
+                  src="{{ waf.second_page.polar_bar_chart_malicious.chart }}"
+                  alt="Blocked Malicious Requests chart"
+                />
+              </div>
+              <div class="polar-chart-description">
+                <h4 class="polar-chart-description-title">
+                  What does it mean?
+                </h4>
+                <p class="polar-chart-text">
+                  {{ waf.second_page.polar_bar_chart_malicious.text }}
+                </p>
+              </div>
+            </div>
+            <div class="polar-chart-divider"></div>
+            <div class="polar-chart-item">
+              <h3 class="polar-chart-title">
+                Allowed Legit Requests (True Negative)
+              </h3>
+              <div class="polar-chart-wrapper">
+                <img
+                  src="{{ waf.second_page.polar_bar_chart_legitimate.chart }}"
+                  alt="Allowed Legit Requests chart"
+                />
+              </div>
+              <div class="polar-chart-description">
+                <h4 class="polar-chart-description-title">
+                  What does it mean?
+                </h4>
+                <p class="polar-chart-text">
+                  {{ waf.second_page.polar_bar_chart_legitimate.text }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card box">
+          <div class="card-title-box">
+            <span class="card-title">WAFs Score Comparison</span>
+            <div class="title-divider"></div>
+            <span class="card-subtitle"
+              >Compare your results to pre-tested WAF results</span
+            >
+          </div>
+          <div class="card-title-border"></div>
+          <div class="scatter-plot-container">
+            <img
+              src="{{ waf.second_page.scatter_plot_graph }}"
+              alt="WAFs Score Comparison"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">
+      <div class="footer-left">
+        <span class="page-number">Page {{ (loop.index - 1) * 4 + 2 }}</span>
+      </div>
+      <div class="footer-right">
+        <span class="copyright-text"
+          >© Check Point Software Technologies Ltd. All rights reserved.</span
+        >
+      </div>
+    </div>
+    <!-- Third Page: TP and FN tables -->
+    <div class="page">
+      <div class="header-bar">
+        <div class="header-left">
+          <h1>WAF Comparison Report</h1>
+        </div>
+        <div class="header-right">{{ images.check_point_logo|safe }}</div>
+      </div>
+      <div class="title">{{ waf.waf_name }}</div>
+      <div class="page-content">
+        <div class="card box">
+          <p class="card-title">Detailed Tests Samples (1/2)</p>
+          <div class="card-title-border description-divider"></div>
+          <span class="description-text"
+            >This page presents a selection of representative test samples used
+            during the WAF evaluation. Each entry shows a real HTTP request
+            tested against the WAF.</span
+          >
+          <ul class="description-list">
+            <li class="description-list-item">
+              <strong>True Positives (TP)</strong> are cases where malicious
+              attacks were correctly blocked stop exploits such as command
+              injections, SQLi, or XSS attempts.
+            </li>
+            <li>
+              <strong>False Negatives (FN)</strong> are cases where malicious
+              attacks were incorrectly allowed — meaning the system failed to
+              identify and block actual threats.
+            </li>
+          </ul>
+          <p class="description-note">
+            <strong>Note:</strong> Use the corresponding Test ID in the main
+            dataset to view full details
+          </p>
+        </div>
+        <!-- TP table -->
+        <div class="card box table-card">
+          <span class="card-title">
+            Successfully blocked malicious attacks
+            <span class="chip">
+              <span>True Positive</span>
+              <div class="chip-divider"></div>
+              <span
+                class="chip-score"
+                style="color: {{ waf.tables_pages.tp.color }};"
+                >{{ waf.tables_pages.tp.score }}%</span
+              >
+            </span>
+          </span>
+          <div class="card-title-border"></div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th class="th-name">Test Name</th>
+                  <th class="th-id">Test ID</th>
+                  <th class="th-url">URL</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in waf.tables_pages.tp.samples %}
+                <tr>
+                  <td class="td-name">{{ row.test_name }}</td>
+                  <td class="td-id num">
+                    {{ row.test_id if row.test_id else '-' }}
+                  </td>
+                  <td class="td-url">
+                    <span class="url-ellipsis">{{ row.url }}</span>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td class="empty" colspan="3">
+                    No true-positive rows available.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- FN table -->
+        <div class="card box table-card">
+          <span class="card-title">
+            Incorrectly allowed malicious attacks
+            <span class="chip">
+              <span>False Negative</span>
+              <div class="chip-divider"></div>
+              <span
+                class="chip-score"
+                style="color: {{ waf.tables_pages.fn.color }};"
+                >{{ waf.tables_pages.fn.score }}%</span
+              >
+            </span>
+          </span>
+          <div class="card-title-border"></div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th class="th-name">Test Name</th>
+                  <th class="th-id">Test ID</th>
+                  <th class="th-url">URL</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in waf.tables_pages.fn.samples %}
+                <tr>
+                  <td class="td-name">{{ row.test_name }}</td>
+                  <td class="td-id num">
+                    {{ row.test_id if row.test_id else '-' }}
+                  </td>
+                  <td class="td-url">
+                    <span class="url-ellipsis">{{ row.url }}</span>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td class="empty" colspan="3">
+                    No false-negative rows available.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">
+      <div class="footer-left">
+        <span class="page-number">Page {{ (loop.index - 1) * 4 + 3 }}</span>
+      </div>
+      <div class="footer-right">
+        <span class="copyright-text"
+          >© Check Point Software Technologies Ltd. All rights reserved.</span
+        >
+      </div>
+    </div>
+    <!-- Fourth Page: TN and FP tables -->
+    <div class="page">
+      <div class="header-bar">
+        <div class="header-left">
+          <h1>WAF Comparison Report</h1>
+        </div>
+        <div class="header-right">{{ images.check_point_logo|safe }}</div>
+      </div>
+      <div class="title">{{ waf.waf_name }}</div>
+      <div class="page-content">
+        <div class="card box">
+          <p class="card-title">Detailed Tests Samples (2/2)</p>
+          <div class="card-title-border description-divider"></div>
+          <span class="description-text"
+            >This page presents a selection of representative test samples used
+            during the WAF evaluation. Each entry shows a real HTTP request
+            tested against the WAF.</span
+          >
+          <ul class="description-list">
+            <li class="description-list-item">
+              <strong>True Negatives (TN)</strong> are legitimate user requests
+              that were successfully allowed — proving the WAF's capability to
+              let normal traffic pass without disruption.
+            </li>
+            <li>
+              <strong>False Positives (FP)</strong> are legitimate user requests
+              that were incorrectly blocked — indicating the system mistakenly
+              classified normal activity as malicious.
+            </li>
+          </ul>
+          <p class="description-note">
+            <strong>Note:</strong> Use the corresponding Test ID in the main
+            dataset to view full details
+          </p>
+        </div>
+        <!-- TN table -->
+        <div class="card box table-card">
+          <span class="card-title">
+            Successfully allowed legitimate requests
+            <span class="chip">
+              <span>True Negative</span>
+              <div class="chip-divider"></div>
+              <span
+                class="chip-score"
+                style="color: {{ waf.tables_pages.tn.color }};"
+                >{{ waf.tables_pages.tn.score }}%</span
+              >
+            </span>
+          </span>
+          <div class="card-title-border"></div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th class="th-name">Test Name</th>
+                  <th class="th-id">Test ID</th>
+                  <th class="th-url">URL</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in waf.tables_pages.tn.samples %}
+                <tr>
+                  <td class="td-name">{{ row.test_name }}</td>
+                  <td class="td-id num">
+                    {{ row.test_id if row.test_id else '-' }}
+                  </td>
+                  <td class="td-url">
+                    <span class="url-ellipsis">{{ row.url }}</span>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td class="empty" colspan="3">
+                    No true-negative rows available.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- FP table -->
+        <div class="card box table-card">
+          <div class="card-title-wrapper">
+            <span class="card-title">
+              Incorrectly blocked legitimate requests
+              <span class="chip">
+                <span>False Positive</span>
+                <div class="chip-divider"></div>
+                <span
+                  class="chip-score"
+                  style="color: {{ waf.tables_pages.fp.color }};"
+                  >{{ waf.tables_pages.fp.score }}%</span
+                >
+              </span>
+            </span>
+          </div>
+          <div class="card-title-border"></div>
+          <div class="table-info-text">
+            <svg
+              class="info-icon"
+              fill="#6B7280"
+              viewBox="-1 0 19 19"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M16.417 9.583A7.917 7.917 0 1 1 8.5 1.666a7.917 7.917 0 0 1 7.917 7.917zM5.85 3.309a6.833 6.833 0 1 0 2.65-.534 6.787 6.787 0 0 0-2.65.534zm2.654 1.336A1.136 1.136 0 1 1 7.37 5.78a1.136 1.136 0 0 1 1.135-1.136zm.792 9.223V8.665a.792.792 0 1 0-1.583 0v5.203a.792.792 0 0 0 1.583 0z"
+              />
+            </svg>
+            <span
+              >The blocked payload may appear in headers, body, or full URL — use the
+              Test ID to view full details.</span
+            >
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th class="th-name">Test Name</th>
+                  <th class="th-id">Test ID</th>
+                  <th class="th-url">URL</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in waf.tables_pages.fp.samples %}
+                <tr>
+                  <td class="td-name">{{ row.test_name }}</td>
+                  <td class="td-id num">
+                    {{ row.test_id if row.test_id else '-' }}
+                  </td>
+                  <td class="td-url">
+                    <span class="url-ellipsis">{{ row.url }}</span>
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td class="empty" colspan="3">
+                    No false-positive rows available.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bar">
+      <div class="footer-left">
+        <span class="page-number">Page {{ (loop.index - 1) * 4 + 4 }}</span>
+      </div>
+      <div class="footer-right">
+        <span class="copyright-text"
+          >© Check Point Software Technologies Ltd. All rights reserved.</span
+        >
+      </div>
+    </div>
+    {% endfor %}
+  </body>
+</html>

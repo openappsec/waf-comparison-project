@@ -1,0 +1,72 @@
+{
+  "Microsoft Azure WAF - Default (OWASP 3.2 Ruleset)": {
+    "Security Quality (TPR)": 97.537,
+    "Detection Quality (TNR)": 45.588,
+    "Balanced Accuracy": 71.563
+  },
+  "CloudFlare WAF - Default Managed + OWASP Core Rulesets": {
+    "Security Quality (TPR)": 63.462,
+    "Detection Quality (TNR)": 99.94,
+    "Balanced Accuracy": 81.701
+  },
+  "AWS WAF - Default Managed": {
+    "Security Quality (TPR)": 79.891,
+    "Detection Quality (TNR)": 93.954,
+    "Balanced Accuracy": 86.922
+  },
+  "AWS WAF - Default Managed + F5 Ruleset": {
+    "Security Quality (TPR)": 80.445,
+    "Detection Quality (TNR)": 93.867,
+    "Balanced Accuracy": 87.156
+  },
+  "NGINX ModSecurity - Default (CRS 4.20.0 Ruleset)": {
+    "Security Quality (TPR)": 92.257,
+    "Detection Quality (TNR)": 81.362,
+    "Balanced Accuracy": 86.81
+  },
+  "F5 NGINX App Protect - Default Profile": {
+    "Security Quality (TPR)": 91.009,
+    "Detection Quality (TNR)": 97.132,
+    "Balanced Accuracy": 94.07
+  },
+  "F5 NGINX App Protect - Strict Profile": {
+    "Security Quality (TPR)": 97.907,
+    "Detection Quality (TNR)": 74.6,
+    "Balanced Accuracy": 86.254
+  },
+  "open-appsec / CloudGuard WAF - Default (High Confidence)": {
+    "Security Quality (TPR)": 99.56,
+    "Detection Quality (TNR)": 99.006,
+    "Balanced Accuracy": 99.283
+  },
+  "open-appsec / CloudGuard WAF - Critical Confidence": {
+    "Security Quality (TPR)": 99.47,
+    "Detection Quality (TNR)": 99.437,
+    "Balanced Accuracy": 99.453
+  },
+  "Imperva Cloud WAF (2025) - Default Configuration": {
+    "Security Quality (TPR)": 11.97,
+    "Detection Quality (TNR)": 99.991,
+    "Balanced Accuracy": 55.981
+  },
+  "F5 BIG-IP Advanced WAF - Rapid Deployment Policy": {
+    "Security Quality (TPR)": 79.039,
+    "Detection Quality (TNR)": 97.106,
+    "Balanced Accuracy": 88.072
+  },
+  "FortiAppSec Cloud - Default Configuration": {
+    "Security Quality (TPR)": 70.143,
+    "Detection Quality (TNR)": 78.612,
+    "Balanced Accuracy": 74.378
+  },
+  "Google Cloud Armor - Preconfigured ModSecurity Rules": {
+    "Security Quality (TPR)": 91.006,
+    "Detection Quality (TNR)": 43.001,
+    "Balanced Accuracy": 67.004
+  },
+  "Barracuda - Default Configuration": {
+    "Security Quality (TPR)": 34.32,
+    "Detection Quality (TNR)": 81.803,
+    "Balanced Accuracy": 58.061
+  }
+}
