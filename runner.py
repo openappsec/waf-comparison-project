@@ -1,158 +1,59 @@
-# Import required libraries
-import concurrent.futures
-from tqdm import tqdm
-import pandas as pd
-import datetime
-import socket
 import json
+from typing import Dict
 
-from analyzer import analyze_results
-# Import custom modules
-from config import conn, WAFS_DICT, DATA_PATH
-from helper import load_data, sendRequest, log, prepare_data, dropTableIfExists
+import pandas as pd
+
+from wafs import Wafs
+from analyzer import analyzer
+from config import conn, DB_PATH, WAFS_CONFIG_FILE_NAME, MAX_WORKERS
+from helper import prepare_data
+from logger import log
 
 
-def check_engine_connection():
+def _save_wafs_config(config: Dict[str, str]) -> None:
     """
-    Function to check if a successful connection to the database engine can be established.
+    Save the WAFs configuration to a JSON file.
+
+    Args:
+        config (Dict[str, str]): Dictionary containing WAF names and their corresponding URLs.
+    """
+    DB_PATH.mkdir(exist_ok=True)
+    with open(DB_PATH / WAFS_CONFIG_FILE_NAME, 'w', encoding='utf-8') as f:
+        json.dump(config, f, ensure_ascii=False, indent=4)
+
+
+def check_engine_connection() -> None:
+    """
+    Check if a successful connection to the database engine can be established.
+
+    Raises:
+        ConnectionError: If the database connection fails.
     """
     try:
-        # Try executing a simple query to check the connection
         _ = pd.read_sql_query("SELECT 1", conn)
         log.info("Database Connected Successfully")
-
     except Exception as e:
         raise ConnectionError(f"Database Connection Failed: {e}")
 
 
-class Wafs:
+def runner(wafs_config: Dict[str, str], max_workers: int = MAX_WORKERS, fast_mode: bool = False) -> None:
     """
-    Class for handling all WAF related operations.
+    Main function to execute the WAF testing process.
+
+    Args:
+        wafs_config (Dict[str, str]): Dictionary containing WAF names and their corresponding URLs.
+        max_workers (int): Number of worker threads for sending payloads.
+        fast_mode (bool): If True, process only ~15% of requests with constant seed for reproducibility.
     """
-
-    # Initialization of the WAFS class, setting up the Web Application Firewall (WAF) data structure and data frame.
-    def __init__(self):
-        self.wafs = WAFS_DICT
-        self.inverse_waf_dict = {v: k for k, v in self.wafs.items()}
-        # self.df = pd.DataFrame(WAFS_DICT)
-
-    def get_url_by_waf_name(self, key):
-        """
-        Function to retrieve the WAF URL by its name.
-        """
-        return self.wafs[key]
-
-    def get_waf_name_by_url(self, key):
-        """
-        Function to retrieve the WAF name by its URL
-        """
-        return self.inverse_waf_dict[key]
-
-    def check_connection(self):
-        checkFailed = False
-
-        # For each WAF, send a test GET request and log if it was successful or not.
-        log.debug("Initiating health check to confirm proper connectivity configurations.")
-        for _waf in self.wafs:
-            resStatusCode, isBlocked = sendRequest(
-                'GET',
-                self.get_url_by_waf_name(_waf),
-                {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:105.0) Gecko/20100101 Firefox/105.0"}
-            )
-
-            if resStatusCode == 200:
-                log.info(f"Health check passed - WAF: {_waf:61}")
-            else:
-                log.error(f"Health check failed - WAF: {_waf:61} - please ensure the WAF allows the following request: {self.get_url_by_waf_name(_waf)}")
-                checkFailed = True
-
-        # For each WAF, send a potentially harmful GET request and check if it gets blocked.
-        log.debug("Initiating WAF functionality verification to ensure that the WAF is in prevention mode and is "
-                  "capable of blocking malicious requests.")
-        for _waf in self.wafs:
-            malicious_payload = self.get_url_by_waf_name(_waf) + "/?a=<script>alert(1)</script>"
-            resStatusCode, isBlocked = sendRequest('GET', malicious_payload)
-            if isBlocked:
-                log.info(f"WAF functionality check passed - WAF: {_waf:50}")
-            else:
-                log.error(f"WAF functionality check failed - WAF: {_waf:50} - please ensure the WAF blocks the following payload: {malicious_payload}")
-                checkFailed = True
-
-        # If any test has failed, raise an error. Otherwise, log that all tests have completed successfully.
-        if checkFailed:
-            raise ConnectionError(
-                "One or more tests have failed. Please review your configurations and initiate the test again.")
-        else:
-            log.debug("All tests have been successfully completed.")
-
-    def _send_payloads(self, _data, _url, _test_name):
-        """
-        Private function to send a set of payloads to a specific WAF
-        """
-        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as _executor:
-            res = list(
-                tqdm(
-                    _executor.map(
-                        lambda payload: sendRequest(
-                            payload['method'],
-                            _url + payload['url'],
-                            payload['headers'],
-                            payload['data']
-                        ),
-                        _data
-                    ),
-                    position=3, leave=False, total=len(_data)
-                )
-            )
-
-        # Create a DataFrame
-        dff = pd.DataFrame(_data)
-
-        dff['machineName'] = socket.gethostname()
-        dff['DestinationURL'] = _url
-        dff['WAF_Name'] = self.get_waf_name_by_url(_url)
-        dff['DateTime'] = datetime.datetime.now()
-        dff['TestName'] = _test_name.stem
-        dff['DataSetType'] = _test_name.parent.stem
-        dff['headers'] = dff['headers'].apply(json.dumps)
-        dff[['response_status_code', 'isBlocked']] = res
-
-        # Replacing null bytes with Unicode Replacement Character in order to save letter in the Database
-        dff['url'] = dff['url'].str.replace("\x00", "\uFFFD")
-        dff['data'] = dff['data'].str.replace("\x00", "\uFFFD")
-
-        # Upload the DataFrame to the Database
-        dff.to_sql('waf_comparison', conn, if_exists='append', index=False)
-
-    def send_payloads(self):
-        """
-        Function to send payloads to all WAFs
-        """
-        if not self.wafs.values():
-            log.warning('WAFS_DICT is empty, skipping payload send step.')
-            return
-
-        # Delete old results:
-        dropTableIfExists('waf_comparison')
-
-        for test_name in tqdm(list(DATA_PATH.rglob('*json')), desc="Sending requests", position=1, leave=False):
-
-            data = load_data(test_name)
-            for url in tqdm(self.wafs.values(), position=2, leave=False):
-                self._send_payloads(data, url, test_name)
-
-
-def main():
-    """
-    Main function to execute the WAF testing process
-    """
-    wafs = Wafs()
+    _save_wafs_config(wafs_config)
+    wafs = Wafs(max_workers=max_workers, fast_mode=fast_mode)
     wafs.check_connection()
     check_engine_connection()
     prepare_data()
     wafs.send_payloads()
-    analyze_results()
+    analyzer()
 
 
 if __name__ == '__main__':
-    main()
+    DEFAULT_WAFS_CONFIG = {}  # Change to WAFs config dict: {'First WAF': 'http://first-waf.com', ...}
+    runner(DEFAULT_WAFS_CONFIG)

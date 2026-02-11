@@ -1,0 +1,13 @@
+**
+!assets/
+!report/
+!wafs.py
+!runner.py
+!analyzer.py
+!config.py
+!helper.py
+!logger.py
+!requirements.txt
+!entrypoint.py
+__pycache__/
+*.pyc
